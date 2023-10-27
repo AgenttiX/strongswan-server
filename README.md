@@ -36,6 +36,13 @@ Place the certificates in these paths:
 - Private key: `/etc/swanctl/private/privkey.pem`
 
 
+## Setup
+- Edit `settings.sh`
+- Run `setup_strongswan.sh`
+- Add UFW firewall rules to `/etc/ufw/before.rules` according to the
+  [DigitalOcean instructions](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ikev2-vpn-server-with-strongswan-on-ubuntu-20-04#step-6-configuring-the-firewall-kernel-ip-forwarding)
+- Reload UFW with `sudo ufw disable && sudo ufw enable`
+
 ## Debugging
 - You can view the server logs with
 `journalctl -u strongswan-starter.service`.
