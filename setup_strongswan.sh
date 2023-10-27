@@ -10,13 +10,15 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 echo "Loading settings from settings.sh."
 . "${SCRIPT_DIR}/settings.sh"
 
-echo "Installing StrongSwan dependencies."
+echo "Installing StrongSwan and its dependencies."
 apt-get update
+# charon-systemd is required for automatic startup
+# https://serverfault.com/a/991625
 # libstrongswan-extra-plugins is required for EAP
 # https://superuser.com/a/1369342
 # strongswan-pki and tpm2-tools are required for TPM support
 # https://docs.strongswan.org/docs/5.9/tpm/tpm2.html
-apt-get install libstrongswan-extra-plugins strongswan strongswan-pki strongswan-swanctl tpm2-tools
+apt-get install charon-systemd libstrongswan-extra-plugins strongswan strongswan-pki strongswan-swanctl tpm2-tools
 
 echo "Configuring sysctl IP forwarding."
 SYSCTL_CONF="/etc/sysctl.conf"
@@ -26,6 +28,8 @@ sed -i "s@#net.ipv4.ip_forward=1@net.ipv4.ip_forward=1@g" "${SYSCTL_CONF}"
 sed -i "s@#net.ipv6.conf.all.forwarding=1@net.ipv6.conf.all.forwarding=1@g" "${SYSCTL_CONF}"
 sed -i "s@#net.ipv4.conf.all.accept_redirects = 0@net.ipv4.conf.all.accept_redirects = 0@g" "${SYSCTL_CONF}"
 sed -i "s@#net.ipv6.conf.all.accept_redirects = 0@net.ipv6.conf.all.accept_redirects = 0@g" "${SYSCTL_CONF}"
+sed -i "s@#net.ipv4.conf.all.send_redirects = 0@net.ipv4.conf.all.send_redirects = 0@g" "${SYSCTL_CONF}"
+echo "Sysctl configured. You may have to reboot for the configuration to take effect."
 
 echo "Configuring swanctl.conf."
 SWANCTL_CONF="/etc/swanctl/swanctl.conf"
@@ -35,8 +39,12 @@ sed -i "s@LOCAL_TS@${LOCAL_TS}@g" "${SWANCTL_CONF}"
 sed -i "s@POOL_IPV4_ADDRS@${POOL_IPV4_ADDRS}@g" "${SWANCTL_CONF}"
 sed -i "s@POOL_IPV4_DNS@${POOL_IPV4_DNS}@g" "${SWANCTL_CONF}"
 
+echo "Restarting StrongSwan."
 systemctl restart strongswan-starter.service
 systemctl status strongswan-starter.service
+
+# Wait for StrongSwan to restart
+sleep 1
 
 echo "Loading swanctl config:"
 swanctl --load-all
@@ -49,3 +57,10 @@ echo "TPM2 persistent keys:"
 tpm2_getcap handles-persistent
 echo "TPM2 handles:"
 tpm2_getcap handles-nv-index
+
+echo "Configuring UFW firewall."
+ufw allow ssh comment SSH
+ufw allow 500,4500/udp comment IKEv2
+ufw enable
+ufw status
+echo "UFW configured. You will also have to edit /etc/ufw/before.rules manually according to the instructions in the readme of this repository."
