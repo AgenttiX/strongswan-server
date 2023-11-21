@@ -48,3 +48,10 @@ Place the certificates in these paths:
 `journalctl -u strongswan-starter.service`.
 - If you get `Policy match error` on a Windows client,
   run `swanctl --load-all` on the server.
+
+### NAT issues
+Client-side double NAT, e.g. mobile operator carrier-grade NAT + phone hotspot NAT,
+will cause issues with the ESP protocol used by IKEv2.
+To avoid these, the ESP must be encapsulated in UDP, which can traverse NAT.
+Please see the
+[official StrongSwan NAT traversal instructions](https://docs.strongswan.org/docs/5.9/features/natTraversal.html).
