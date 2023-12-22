@@ -14,11 +14,12 @@ echo "Installing StrongSwan and its dependencies."
 apt-get update
 # charon-systemd is required for automatic startup
 # https://serverfault.com/a/991625
-# libstrongswan-extra-plugins is required for EAP
+# libcharon-extra-plugins and libstrongswan-extra-plugins are required for EAP
 # https://superuser.com/a/1369342
+# https://superuser.com/a/1349459
 # strongswan-pki and tpm2-tools are required for TPM support
 # https://docs.strongswan.org/docs/5.9/tpm/tpm2.html
-apt-get install charon-systemd libstrongswan-extra-plugins strongswan strongswan-pki strongswan-swanctl tpm2-tools
+apt-get install charon-systemd libcharon-extra-plugins libstrongswan-extra-plugins strongswan strongswan-pki strongswan-swanctl tpm2-tools
 
 echo "Configuring sysctl IP forwarding."
 SYSCTL_CONF="/etc/sysctl.conf"
