@@ -29,6 +29,9 @@ with the following exceptions:
 The process is the same as for a RADIUS server.
 Therefore please see my
 [RADIUS server instructions](https://github.com/AgenttiX/freeradius-letsencrypt#readme).
+When requesting the certificate,
+add all DNS names and IP addresses of the VPN server to the certificate as *Alternative names -> DNS*
+to ensure that it's recognised regardless of where the client connects from.
 
 Place the certificates in these paths:
 - CA certificate: `/etc/swanctl/x509ca/cacert.pem`
