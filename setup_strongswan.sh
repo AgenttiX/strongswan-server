@@ -47,10 +47,19 @@ systemctl status strongswan-starter.service
 # Wait for StrongSwan to restart
 sleep 1
 
+echo "Clearing swanctl credentials and certificates"
+swanctl --load-creds --clear
 echo "Loading swanctl config:"
 swanctl --load-all
 echo "Swanctl certificates:"
-swanctl --list-certs
+CERTS="$(swanctl --list-certs)"
+echo "${CERTS}"
+if [[ "${CERTS}" == *"has private key"* ]]; then
+    echo "The private key seems to be loaded correctly."
+else
+    echo "Warning! The certificate does not have the \"has private key\" flag, and therefore the private key seems not to be loaded correctly."
+    echo "Is the private key for the correct certificate?"
+fi
 echo "Swanctl connections:"
 swanctl --list-conns
 
